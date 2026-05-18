@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>For You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#d4a85a;--gold2:#f0cc88;--cream:#fdf4e7;--ink:#1e0f2a;--deep:#0e0818;
+  --muted:rgba(253,244,231,.5);
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'Jost',sans-serif;
+}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--deep);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+
+#bg{
+  position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse at 28% 18%,#2a0e45 0%,#0e0818 55%,#081525 100%);
+}
+
+/* ─── STARS ─── */
+.star{position:fixed;border-radius:50%;background:#fff;z-index:1;animation:tw ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.05}50%{opacity:var(--op)}}
+
+/* ─── PETALS ─── */
+.petal{position:fixed;top:-30px;pointer-events:none;z-index:2;opacity:0;animation:fall linear infinite}
+@keyframes fall{
+  0%{transform:translateY(0) rotate(0) translateX(0);opacity:0}
+  6%{opacity:.75}88%{opacity:.4}
+  100%{transform:translateY(110vh) rotate(640deg) translateX(55px);opacity:0}
+}
+
+/* ─── BLOOM ─── */
+#bloom{position:fixed;inset:0;z-index:50;pointer-events:none;display:flex;align-items:center;justify-content:center;opacity:0}
+.b-ring{position:absolute;border-radius:50%;border:1.5px solid;width:100px;height:100px;transform:scale(0);opacity:0}
+#bloom.fire .b-ring{animation:bexpand 1.1s ease-out forwards}
+@keyframes bexpand{0%{transform:scale(0);opacity:1}70%{opacity:.5}100%{transform:scale(7);opacity:0}}
+
+/* ─── UNLOCK SCREEN ─── */
+#s-unlock{
+  position:fixed;inset:0;z-index:10;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:2rem 1.5rem;
+  transition:opacity .55s ease,transform .55s ease;
+}
+#s-unlock.out{opacity:0;transform:scale(.93);pointer-events:none}
+
+.orb{
+  width:86px;height:86px;border-radius:50%;
+  background:radial-gradient(circle at 38% 35%,#4a1d6b,#1a0830);
+  border:1px solid rgba(212,168,90,.3);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:2rem;font-size:34px;position:relative;
+  animation:opulse 3.5s ease-in-out infinite;
+}
+.orb::before,.orb::after{content:'';position:absolute;border-radius:50%;border:.5px solid rgba(212,168,90,.12);animation:opulse 3.5s ease-in-out infinite}
+.orb::before{inset:-13px;animation-delay:.45s}
+.orb::after{inset:-26px;animation-delay:.9s}
+@keyframes opulse{
+  0%,100%{box-shadow:0 0 30px rgba(160,60,220,.18),0 0 60px rgba(160,60,220,.08)}
+  50%{box-shadow:0 0 50px rgba(212,168,90,.35),0 0 90px rgba(212,168,90,.1)}
+}
+
+.u-title{
+  font-family:var(--serif);font-size:clamp(24px,7vw,36px);font-weight:400;font-style:italic;
+  color:var(--cream);text-align:center;line-height:1.25;margin-bottom:.5rem
+}
+.u-sub{
+  font-size:11px;font-weight:300;color:var(--muted);
+  letter-spacing:.24em;text-transform:uppercase;text-align:center;margin-bottom:2.5rem
+}
+
+.inp-wrap{width:100%;max-width:310px;position:relative;margin-bottom:.85rem}
+.kfield{
+  width:100%;background:rgba(255,255,255,.05);
+  border:1px solid rgba(212,168,90,.22);border-radius:50px;
+  padding:15px 50px 15px 22px;color:var(--cream);
+  font-family:var(--sans);font-size:15px;font-weight:300;
+  letter-spacing:.14em;text-align:center;outline:none;
+  transition:border-color .3s,background .3s;
+  -webkit-appearance:none;appearance:none;caret-color:var(--gold)
+}
+.kfield::placeholder{color:rgba(253,244,231,.16);letter-spacing:.08em}
+.kfield:focus{border-color:rgba(212,168,90,.58);background:rgba(255,255,255,.08)}
+.eye{
+  position:absolute;right:16px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:17px;
+  color:rgba(212,168,90,.4);padding:4px;-webkit-tap-highlight-color:transparent;
+  transition:color .2s
+}
+.eye:active{color:var(--gold)}
+
+.obtn{
+  width:100%;max-width:310px;padding:16px;
+  background:linear-gradient(135deg,#9e6415,#d4a85a,#f0cc88,#d4a85a);
+  background-size:200% 200%;animation:shimmer 4s ease infinite;
+  border:none;border-radius:50px;color:var(--ink);
+  font-family:var(--sans);font-size:12px;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;cursor:pointer;
+  transition:transform .15s,opacity .2s;-webkit-tap-highlight-color:transparent;margin-bottom:1rem
+}
+@keyframes shimmer{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+.obtn:active{transform:scale(.97);opacity:.88}
+
+.emsg{font-size:12px;color:#f09090;letter-spacing:.06em;text-align:center;height:16px;opacity:0;transition:opacity .3s}
+.emsg.show{opacity:1}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+.shake{animation:shake .38s ease}
+
+/* ─── MESSAGE SCREENS ─── */
+.smsg{
+  position:fixed;inset:0;z-index:30;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  display:none;opacity:0;pointer-events:none;
+  transition:opacity .6s ease
+}
+.smsg.active{display:block;opacity:1;pointer-events:all}
+
+.mbg{
+  min-height:100%;
+  display:flex;flex-direction:column;align-items:center;
+  padding:7vh 1.5rem 10vh;position:relative
+}
+
+#s-sec .mbg{background:linear-gradient(180deg,#1a0a30 0%,#0c1428 45%,#160820 100%)}
+#s-dec .mbg{background:linear-gradient(180deg,#0c1e32 0%,#081420 50%,#0c1630 100%)}
+
+/* reveal */
+.rev{opacity:0;transform:translateY(20px)}
+.rev.go{animation:fup .72s ease forwards}
+@keyframes fup{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.micon.rev{transform:scale(.4) rotate(-18deg)}
+.micon.go{animation:popin .78s cubic-bezier(.34,1.52,.64,1) forwards}
+@keyframes popin{from{opacity:0;transform:scale(.4) rotate(-18deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+
+.micon{font-size:28px;display:block;margin-bottom:1.5rem;opacity:0}
+.meyebrow{
+  font-size:10px;font-weight:400;letter-spacing:.28em;text-transform:uppercase;
+  color:rgba(212,168,90,.5);margin-bottom:.85rem;text-align:center
+}
+.mhead{
+  font-family:var(--serif);font-size:clamp(27px,8.5vw,44px);font-weight:400;
+  font-style:italic;color:var(--cream);text-align:center;line-height:1.2;margin-bottom:.35rem
+}
+.msub{
+  font-family:var(--serif);font-size:clamp(27px,8.5vw,44px);font-weight:500;
+  color:var(--gold2);text-align:center;line-height:1.1;margin-bottom:2.6rem
+}
+.gline{
+  width:1px;height:50px;
+  background:linear-gradient(to bottom,transparent,var(--gold),transparent);
+  margin-bottom:2.6rem
+}
+
+.mcard{
+  width:100%;max-width:390px;
+  background:rgba(255,255,255,.04);
+  border:.5px solid rgba(212,168,90,.16);border-radius:18px;
+  padding:1.6rem 1.5rem;margin-bottom:1.15rem;position:relative;overflow:hidden
+}
+.mcard::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(212,168,90,.38),transparent)
+}
+.cico{font-size:19px;display:block;margin-bottom:.8rem}
+.ctxt{
+  font-family:var(--serif);font-size:clamp(15px,4.4vw,19px);font-weight:400;
+  font-style:italic;color:rgba(253,244,231,.8);line-height:1.82;text-align:center
+}
+
+/* Decoy overrides — casual, warm, not romantic */
+#s-dec .meyebrow{color:rgba(110,170,230,.48)}
+#s-dec .mhead{color:#9ec5e0}
+#s-dec .msub{color:#7aaabf;font-size:clamp(22px,6.5vw,36px)}
+#s-dec .gline{background:linear-gradient(to bottom,transparent,rgba(110,170,230,.35),transparent)}
+#s-dec .mcard{border-color:rgba(110,170,230,.14)}
+#s-dec .mcard::before{background:linear-gradient(90deg,transparent,rgba(110,170,230,.3),transparent)}
+#s-dec .ctxt{font-style:normal;font-family:var(--sans);font-size:clamp(14px,4vw,16px);font-weight:300;line-height:1.92;color:rgba(190,215,240,.78)}
+#s-dec .footer-text{color:rgba(110,170,230,.4)}
+#s-dec .fdot{background:rgba(110,170,230,.28)}
+
+.mquote{width:100%;max-width:390px;padding:0 .4rem;margin-bottom:1.8rem;text-align:center}
+.qm{font-family:var(--serif);font-size:60px;color:rgba(212,168,90,.11);line-height:.45;display:block;margin-bottom:.7rem}
+.qt{font-family:var(--serif);font-size:clamp(16px,4.6vw,21px);font-style:italic;color:var(--cream);line-height:1.65}
+
+.mfooter{text-align:center;margin-top:.5rem}
+.fdots{display:flex;gap:8px;justify-content:center;margin-bottom:1.1rem}
+.fdot{width:4px;height:4px;border-radius:50%;background:rgba(212,168,90,.32)}
+.footer-text{font-size:11px;font-weight:300;letter-spacing:.22em;text-transform:uppercase;color:rgba(212,168,90,.42)}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<div id="bg"></div>
+<div id="sc"></div>
+<div id="pc"></div>
+
+<!-- BLOOM -->
+<div id="bloom">
+  <div class="b-ring" style="border-color:rgba(212,168,90,.75);animation-delay:0s"></div>
+  <div class="b-ring" style="border-color:rgba(232,160,176,.5);animation-delay:.1s"></div>
+  <div class="b-ring" style="border-color:rgba(180,90,230,.4);animation-delay:.2s"></div>
+  <div class="b-ring" style="border-color:rgba(253,244,231,.25);animation-delay:.3s"></div>
+</div>
+
+<!-- ══ SCREEN 1: UNLOCK ══ -->
+<div id="s-unlock">
+  <div class="orb" aria-hidden="true">🔮</div>
+  <h1 class="u-title">Something beautiful<br>is waiting for you</h1>
+  <p class="u-sub">Enter your key to open</p>
+  <div class="inp-wrap">
+    <input class="kfield" id="kf" type="password"
+      placeholder="✦  your secret key  ✦"
+      maxlength="40" autocomplete="off" autocorrect="off"
+      autocapitalize="none" spellcheck="false" aria-label="Secret key"/>
+    <button class="eye" id="eyeBtn" onclick="toggleEye()" aria-label="Toggle visibility">👁</button>
+  </div>
+  <button class="obtn" onclick="tryUnlock()">Open</button>
+  <p class="emsg" id="em">That key doesn't fit. Try again 🌸</p>
+</div>
+
+<!-- ══ SCREEN 2A: SECRET MESSAGE ══ -->
+<div class="smsg" id="s-sec" aria-label="Secret message">
+  <div class="mbg">
+    <span class="micon rev" id="a0">🌸</span>
+    <p   class="meyebrow rev" id="a1">A message, only for you since I am not allowed to text you </p>
+    <h1  class="mhead rev"   id="a2">You are so loved,</h1>
+    <div class="msub rev"    id="a3">endlessly.</div>
+    <div class="gline rev"   id="a4" aria-hidden="true"></div>
+    <div class="mcard rev"   id="a5">
+      <span class="cico" aria-hidden="true">✨</span>
+      <p class="ctxt">
+        First of all thank you very much for the calculator. It really helped me in this exams. I was able to answer majority of the question. Out of 9 questions I solved all of it. Well obviously some would be wrong but still I was able to solve majority of them.
+      </p>
+    </div>
+    <div class="mcard rev" id="a6">
+      <span class="cico" aria-hidden="true">🌙</span>
+      <p class="ctxt">
+        There were actually people who gave up on the exams. Like there was this guy in our class who did not write anything at all in the Section B. He just slept until the paper was done. It was so sad. To come to school for three years and then write nothing in the final examination.
+      </p>
+    </div>
+    <div class="mcard">
+      <span aria-hidden="true">🌙</span>
+      <p style="color: white;" class="ctxt">
+        You know I cannot do this anymore. Do you know that I almost called you today to unblock me on WhatsApp? But then I stopped and I decided to write to you in this way instead. I have decided to do this every week. Since it's really hard to code all this out I can only send one of these every week. I will do my best accumulate all the things that happened this week and tell you all. I don't know about you but I miss texting you very much. If all things go on well no one should be able to open this message and read apart from you.
+      </p>
+    </div>
+    <div class="mcard">
+      <span aria-hidden="true">🌙</span>
+      <p style="color: white;" class="ctxt">
+        I have made this message in a way that even if you happen to be caught you can use a different password that'll take you to a different message where it's only about greetings and some warm wishes. The password for the decoy message is "hello". And the password for the actual message I want you to read is "godfredissocool". You see how cool I am? 😎😎. So you don't need to worry at all just try not to open it when your mum is around okay?
+      </p>
+    </div>
+    <div class="mcard">
+      <span aria-hidden="true">🌙</span>
+      <p style="color: white;" class="ctxt">
+        I think the message is becoming too long. There are so many things I want to say but to avoid boring you I'll only say one important thing. I now understand how you feel when other guys try to hit on you when you already have someone you like. There was this girl I met coincedentally at the gas filling station at Dansoman. She was my classmate back in JHS, when I went to the government school. She was the one who recognized me and called out my name but honestly I didn't remember her's at all but I just acted cool. She requested my number I gave it to her. That was the biggest mistake I did. I should have just said I don't have a phone. I said this girl can send 9 consecutive messages when I am offline. And the way she talks too, always asking for my picture. Did I tell her I take pictures? NO!!! Like texting her become really uncomfortable for me.
+      </p>
+    </div>
+    <div class="mcard">
+      <span aria-hidden="true">🌙</span>
+      <p style="color: white;" class="ctxt">
+        At the time too I was coding this website for you so I needed the data if not for that I would have gone offline so she'll not worry me. So I gave her an excuse that I was washing. This girl said that she'll wash for me so that I can have time to text her. I was like you're not serious. Whiles I am finding ways to text the one I love again you want me to find time to text you?...I only said that in my head but that was how I truly felt. Oh like this girl called me 2 minutes after I have not replied to her text. And I was like, "Why the hell did you call me?...I actually told her this one" When I saw that it looks like this girl wants to be close to me and one day suddenly tell me she likes me, you know I don't want her to be apart of the problems I already have. Already I have you the biggest problem ever if not for your parents restricting us like you'll be thinking about ways to worry me just for worrying sake. She was *a part* of the problem, whiles you you're the entire problem. So I blocked her in the end.
+      </p>
+    </div>
+    <div class="mcard">
+      <span aria-hidden="true">🌙</span>
+      <p style="color: white;" class="ctxt">
+        I never knew you had to go through all these troubles. It is soo exhausting and uncomfortable. But I like how I didn't hesitate to block her. She was not even that beautiful. I said you have spoilt my eyes. Now I hardly see any girl and call them beautiful. My love is very beautiful indeed, peerless beauty 😊😊 unmatched. But don't let your head be too big ooo or else it'll burst. Anyway this message has been too long don't you think? If you feel that it's too long let me know so that next time I'll make it shorter.
+      </p>
+    </div>
+    <div class="mquote rev" id="a7">
+      <span class="qm" aria-hidden="true">"</span>
+      <p class="qt">You deserve every beautiful thing the universe has been saving up for you.</p>
+    </div>
+    <div class="mfooter rev" id="a8">
+      <div class="fdots" aria-hidden="true">
+        <div class="fdot"></div><div class="fdot"></div><div class="fdot"></div>
+      </div>
+      <p class="footer-text">with all the love in the world 🌺</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 2B: DECOY MESSAGE ══ -->
+<div class="smsg" id="s-dec" aria-label="Casual message">
+  <div class="mbg">
+    <span class="micon rev" id="b0">👋</span>
+    <p   class="meyebrow rev" id="b1">just dropping by</p>
+    <h1  class="mhead rev"   id="b2">Hey, hope you're</h1>
+    <div class="msub rev"    id="b3">doing well!</div>
+    <div class="gline rev"   id="b4" aria-hidden="true"></div>
+    <div class="mcard rev"   id="b5">
+      <span class="cico" aria-hidden="true">☀️</span>
+      <p class="ctxt">
+        Just wanted to check in and say hi! Hope your day is
+        going smoothly and you're not stressing too much 😄
+      </p>
+    </div>
+    <div class="mcard rev" id="b6">
+      <span class="cico" aria-hidden="true">🎵</span>
+      <p class="ctxt">
+        Reminder to drink some water, take a break, and listen
+        to a good song today. You've got this, seriously.
+      </p>
+    </div>
+    <div class="mcard rev" id="b7">
+      <span class="cico" aria-hidden="true">💬</span>
+      <p class="ctxt">
+        Let's catch up soon — it's been a while and there's a lot
+        to talk about. Hit me up whenever you're free 😊
+      </p>
+    </div>
+    <div class="mfooter rev" id="b8">
+      <div class="fdots" aria-hidden="true">
+        <div class="fdot"></div><div class="fdot"></div><div class="fdot"></div>
+      </div>
+      <p class="footer-text">talk soon! 👋</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══ CONFIG — edit these ══ */
+const REAL_KEY  = "godfredissocool";  // real secret key
+const DECOY_KEY = "hello";     // innocent decoy key
+/* ════════════════════════ */
+
+/* Stars */
+const sc=document.getElementById("sc");
+for(let i=0;i<90;i++){
+  const s=document.createElement("div");s.className="star";
+  const z=Math.random()*2+.8;
+  s.style.cssText=`width:${z}px;height:${z}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--op:${.15+Math.random()*.55};animation-duration:${2+Math.random()*5}s;animation-delay:${-Math.random()*6}s`;
+  sc.appendChild(s);
+}
+
+/* Petals */
+const pc=document.getElementById("pc");
+const gs=["🌸","🌺","🌼","✨","💫","⭐","🌷"];
+function spawnP(){
+  const p=document.createElement("div");p.className="petal";
+  p.textContent=gs[Math.floor(Math.random()*gs.length)];
+  p.style.cssText=`left:${Math.random()*100}%;font-size:${10+Math.random()*14}px;animation-duration:${7+Math.random()*8}s;animation-delay:${Math.random()*3}s`;
+  pc.appendChild(p);setTimeout(()=>p.remove(),18000);
+}
+for(let i=0;i<10;i++)setTimeout(spawnP,i*900);
+setInterval(spawnP,2000);
+
+/* Eye toggle */
+function toggleEye(){
+  const f=document.getElementById("kf");
+  f.type=f.type==="password"?"text":"password";
+  document.getElementById("eyeBtn").textContent=f.type==="password"?"👁":"🙈";
+}
+document.getElementById("kf").addEventListener("keydown",e=>{if(e.key==="Enter")tryUnlock()});
+
+/* Unlock */
+function tryUnlock(){
+  const val=document.getElementById("kf").value.trim().toLowerCase();
+  const em=document.getElementById("em");
+  const fld=document.getElementById("kf");
+  if(val===REAL_KEY.toLowerCase()){
+    bloom(()=>reveal("s-sec","a",9));
+  } else if(val===DECOY_KEY.toLowerCase()){
+    bloom(()=>reveal("s-dec","b",9));
+  } else {
+    em.classList.add("show");
+    fld.classList.remove("shake");void fld.offsetWidth;fld.classList.add("shake");
+    fld.value="";setTimeout(()=>fld.classList.remove("shake"),400);
+  }
+}
+
+/* Bloom */
+function bloom(cb){
+  document.getElementById("s-unlock").classList.add("out");
+  const b=document.getElementById("bloom");
+  b.style.opacity="1";b.classList.add("fire");
+  setTimeout(()=>{b.style.opacity="0";b.classList.remove("fire");cb()},900);
+}
+
+/* Reveal */
+function reveal(sid,pre,n){
+  const s=document.getElementById(sid);
+  s.style.display="block";
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    s.classList.add("active");
+    for(let i=0;i<n;i++){
+      const el=document.getElementById(pre+i);
+      if(!el)continue;
+      setTimeout(()=>el.classList.add("go"),i*185);
+    }
+  }));
+}
+</script>
+</body>
+</html>
