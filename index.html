@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>For You — vol. i</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500;1,600&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --linen:        #e8ddd0;
+    --paper:        #fdf6ed;
+    --paper-shadow: rgba(60, 35, 10, 0.12);
+
+    --ink:          #2c1810;
+    --ink-faded:    rgba(44, 24, 16, 0.45);
+    --ink-accent:   #8b4513;
+
+    --doodle:       #6b4c2a;
+    --doodle-dim:   rgba(107, 76, 42, 0.35);
+
+    --crease:       rgba(0, 0, 0, 0.06);
+    --wax:          #8b2818;
+    --wax-light:    #c4724a;
+
+    --serif:   'Lora', Georgia, serif;
+    --display: 'Cormorant Garamond', Georgia, serif;
+    --hand:    'Caveat', 'Bradley Hand', cursive;
+
+    --fold-duration: 1.1s;
+  }
+  @media (max-width: 520px) {
+    :root { --fold-duration: 0.75s; }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: var(--serif);
+    background: var(--linen);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ──────────────────────────────────────────────────────
+     SOUND TOGGLE (top-right corner)
+  ────────────────────────────────────────────────────── */
+  #sound-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(139, 69, 19, 0.2);
+    color: var(--ink-accent);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    z-index: 50;
+    transition: background 0.2s ease, transform 0.2s ease;
+    user-select: none;
+  }
+  #sound-toggle:hover { background: rgba(255,255,255,0.85); }
+  #sound-toggle.on    { color: var(--ink); }
+
+  /* ──────────────────────────────────────────────────────
+     SCREEN 1 — UNLOCK
+  ────────────────────────────────────────────────────── */
+  #s-unlock {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 70% 40%, rgba(255, 220, 220, 0.25), transparent 60%),
+      radial-gradient(ellipse at 20% 80%, rgba(232, 168, 124, 0.18), transparent 55%),
+      var(--linen);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 10;
+    overflow: hidden;
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  #s-unlock.out {
+    opacity: 0;
+    transform: scale(0.98);
+    pointer-events: none;
+  }
+
+  /* The unlock content sits above the tree + petals */
+  #s-unlock > *:not(#blossom-tree):not(#petals) { position: relative; z-index: 2; }
+
+  /* ──────────────────────────────────────────────────────
+     PLUM BLOSSOM TREE (background, right side)
+  ────────────────────────────────────────────────────── */
+  #blossom-tree {
+    position: absolute;
+    right: -40px;
+    bottom: 0;
+    height: 100%;
+    width: auto;
+    max-width: 60%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.85;
+    filter: drop-shadow(0 4px 14px rgba(120, 60, 40, 0.08));
+  }
+  @media (max-width: 640px) {
+    #blossom-tree {
+      right: -80px;
+      max-width: 90%;
+      opacity: 0.7;
+    }
+  }
+  /* Branches sway very gently in an imagined breeze */
+  #blossom-tree .sway {
+    transform-origin: 50% 100%;
+    animation: sway 9s ease-in-out infinite;
+  }
+  #blossom-tree .sway-slow {
+    transform-origin: 50% 100%;
+    animation: sway 13s ease-in-out infinite reverse;
+  }
+  @keyframes sway {
+    0%, 100% { transform: rotate(-0.6deg); }
+    50%      { transform: rotate( 0.6deg); }
+  }
+  /* Individual blossoms breathe softly */
+  #blossom-tree .bloom {
+    transform-origin: center;
+    animation: bloomPulse 6s ease-in-out infinite;
+  }
+  @keyframes bloomPulse {
+    0%, 100% { opacity: 0.95; }
+    50%      { opacity: 0.75; }
+  }
+
+  /* ──────────────────────────────────────────────────────
+     FALLING PETALS
+  ────────────────────────────────────────────────────── */
+  #petals {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .petal {
+    position: absolute;
+    top: -30px;
+    width: 14px;
+    height: 14px;
+    will-change: transform, opacity;
+    opacity: 0;
+  }
+  .petal svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  /* Two animations layered: vertical fall + horizontal sway + rotation */
+  @keyframes petalFall {
+    0%   { transform: translateY(-30px) translateX(0)    rotate(0deg);   opacity: 0; }
+    8%   { opacity: 1; }
+    90%  { opacity: 0.9; }
+    100% { transform: translateY(105vh)  translateX(var(--drift, 60px)) rotate(var(--spin, 360deg)); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #petals { display: none; }
+    #blossom-tree .sway,
+    #blossom-tree .sway-slow,
+    #blossom-tree .bloom { animation: none; }
+  }
+
+  .seal {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #c4724a, #7a3a1a);
+    border: 2px solid rgba(212, 168, 90, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 24px rgba(140, 60, 20, 0.25);
+    animation: sealPulse 3s ease-in-out infinite;
+    user-select: none;
+  }
+  @keyframes sealPulse {
+    0%, 100% { box-shadow: 0 4px 24px rgba(140, 60, 20, 0.25); }
+    50%      { box-shadow: 0 4px 40px rgba(140, 60, 20, 0.5);  }
+  }
+
+  .u-title {
+    color: var(--ink);
+    font-family: var(--display);
+    font-weight: 500;
+    font-style: italic;
+    font-size: clamp(28px, 6vw, 38px);
+    margin: 0 0 0.4rem;
+    letter-spacing: 0.01em;
+  }
+  .u-sub {
+    color: var(--ink-faded);
+    font-family: var(--serif);
+    font-size: 14px;
+    margin: 0 0 2rem;
+    letter-spacing: 0.05em;
+  }
+
+  .kfield {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(139, 69, 19, 0.25);
+    color: var(--ink);
+    border-radius: 4px;
+    padding: 14px 18px;
+    font-family: var(--serif);
+    font-size: 16px; /* prevents iOS auto-zoom on focus */
+    width: min(320px, 86vw);
+    outline: none;
+    text-align: center;
+    letter-spacing: 0.05em;
+    transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+  }
+  .kfield:focus {
+    border-color: rgba(139, 69, 19, 0.6);
+    background: rgba(255, 255, 255, 0.85);
+  }
+  .kfield::placeholder { color: var(--ink-faded); font-style: italic; }
+  .kfield.shake { animation: shake 0.45s ease; border-color: #b04a2a; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%     { transform: translateX(-6px); }
+    40%     { transform: translateX(6px); }
+    60%     { transform: translateX(-4px); }
+    80%     { transform: translateX(4px); }
+  }
+
+  .obtn {
+    margin-top: 1.2rem;
+    background: linear-gradient(135deg, #7a3a1a, #c4724a, #e8a87c, #c4724a);
+    background-size: 200% 200%;
+    border: none;
+    border-radius: 4px;
+    color: #fff8f2;
+    letter-spacing: 0.2em;
+    padding: 12px 28px;
+    font-family: var(--serif);
+    font-size: 13px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.25s ease, background-position 0.6s ease;
+    box-shadow: 0 4px 14px rgba(140, 60, 20, 0.2);
+  }
+  @media (hover: hover) {
+    .obtn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(140, 60, 20, 0.3);
+      background-position: 100% 100%;
+    }
+  }
+  .obtn:active { transform: translateY(0); }
+
+  .u-hint {
+    margin-top: 1.6rem;
+    color: var(--ink-faded);
+    font-size: 12px;
+    font-style: italic;
+    font-family: var(--display);
+    letter-spacing: 0.06em;
+    min-height: 1em;
+    text-align: center;
+  }
+  .u-memory {
+    margin-top: 0.4rem;
+    color: var(--ink-faded);
+    font-size: 11px;
+    font-style: italic;
+    font-family: var(--display);
+    letter-spacing: 0.12em;
+    min-height: 1em;
+    opacity: 0.65;
+  }
+
+  /* ──────────────────────────────────────────────────────
+     SCREEN 2 — LETTER
+  ────────────────────────────────────────────────────── */
+  #s-letter {
+    min-height: 100vh;
+    width: 100%;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  #s-letter.in { opacity: 1; }
+
+  #linen-bg {
+    width: 100%;
+    min-height: 100vh;
+    background: var(--linen);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    padding: 56px 20px 80px;
+    display: flex;
+    justify-content: center;
+  }
+
+  #fold-wrapper {
+    perspective: 1200px;
+    perspective-origin: 50% 0%;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* While closed, the folded (face-down) bottom panel must not steal clicks
+     from the wax seal sitting on the crease. */
+  #fold-wrapper.closed #panel-bottom { pointer-events: none; }
+
+  .panel {
+    width: 100%;
+    background-color: var(--paper);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+    position: relative;
+  }
+
+  #panel-top {
+    box-shadow:
+      0 -2px 12px var(--paper-shadow),
+      0 2px 0px var(--crease);
+    border-radius: 3px 3px 0 0;
+    z-index: 2;
+  }
+
+  #fold-crease {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      var(--crease) 15%,
+      var(--crease) 85%,
+      transparent 100%
+    );
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  /* The wax seal sits over the crease before the fold opens */
+  #wax-seal {
+    position: absolute;
+    bottom: -34px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 68px;
+    height: 68px;
+    z-index: 20;
+    cursor: pointer;
+    filter: drop-shadow(0 4px 10px rgba(80, 20, 10, 0.35));
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #wax-seal:hover { transform: translateX(-50%) scale(1.04); }
+  #wax-seal .wax-half {
+    transform-origin: center;
+    transition: transform 0.7s cubic-bezier(0.5, 0, 0.5, 1.2),
+                opacity 0.7s ease;
+  }
+  #wax-seal.cracked .wax-left  { transform: translate(-22px, 14px) rotate(-28deg); opacity: 0; }
+  #wax-seal.cracked .wax-right { transform: translate( 22px, 14px) rotate( 28deg); opacity: 0; }
+
+  #panel-bottom {
+    transform-origin: top center;
+    transform: rotateX(-179.9deg);
+    backface-visibility: hidden;
+    transition: transform var(--fold-duration) cubic-bezier(0.4, 0, 0.15, 1);
+    border-radius: 0 0 3px 3px;
+    box-shadow: 0 8px 32px var(--paper-shadow);
+    will-change: transform;
+  }
+  #panel-bottom.unfolded {
+    transform: rotateX(0deg);
+    animation: paperSettle 0.5s ease-out var(--fold-duration);
+  }
+  @keyframes paperSettle {
+    0%   { transform: rotateX(0deg);   }
+    40%  { transform: rotateX(2.5deg); }
+    75%  { transform: rotateX(-1deg);  }
+    100% { transform: rotateX(0deg);   }
+  }
+
+  #fold-shadow {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 28px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.10), transparent);
+    pointer-events: none;
+    transition: opacity 0.8s ease 0.4s;
+    z-index: 1;
+    opacity: 1;
+  }
+  #panel-bottom.unfolded #fold-shadow { opacity: 0; }
+
+  .panel-inner {
+    padding: 48px 64px;
+    position: relative;
+    overflow: visible;
+  }
+  @media (max-width: 520px) {
+    .panel-inner { padding: 32px 24px 32px 56px; }
+    #linen-bg    { padding: 32px 12px 60px; }
+  }
+
+  /* Tap-to-open hint that floats below the closed note */
+  #open-hint {
+    position: absolute;
+    bottom: -78px;
+    left: 0; right: 0;
+    text-align: center;
+    color: var(--ink-faded);
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 14px;
+    letter-spacing: 0.14em;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    pointer-events: none;
+  }
+  #open-hint.show { opacity: 1; animation: hintBob 2.4s ease-in-out infinite; }
+  @keyframes hintBob {
+    0%,100% { transform: translateY(0);    }
+    50%     { transform: translateY(-4px); }
+  }
+
+  /* Sequenced fade-in for top-panel content */
+  .seq {
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .seq.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* SVG handwritten salutation */
+  #salutation-svg {
+    display: block;
+    height: 38px;
+    width: auto;
+    max-width: 100%;
+    margin: 0 0 1.8rem;
+    overflow: visible;
+  }
+  @media (max-width: 520px) {
+    #salutation-svg { height: 32px; }
+  }
+  #sal-path {
+    stroke: var(--ink-accent);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+  }
+
+  .letter-date {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-faded);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.4rem;
+    text-align: right;
+  }
+
+  .letter-para {
+    font-family: var(--serif);
+    font-size: clamp(15px, 2.5vw, 17px);
+    font-weight: 400;
+    line-height: 1.9;
+    color: var(--ink);
+    margin: 0 0 1.4rem;
+    text-indent: 1.5em;
+  }
+  /* Subtle ink-density variation per paragraph (pen running dry) */
+  .para-wrap:nth-of-type(1) .letter-para { color: rgba(44,24,16,1);    }
+  .para-wrap:nth-of-type(2) .letter-para { color: rgba(44,24,16,0.94); }
+  .para-wrap:nth-of-type(3) .letter-para { color: rgba(44,24,16,0.98); }
+  .para-wrap:nth-of-type(4) .letter-para { color: rgba(44,24,16,0.92); }
+  .para-wrap:nth-of-type(5) .letter-para { color: rgba(44,24,16,0.97); }
+  .para-wrap:nth-of-type(6) .letter-para { color: rgba(44,24,16,0.90); }
+
+  .para-wrap:first-of-type .letter-para { text-indent: 0; }
+  .para-wrap:first-of-type .letter-para::first-letter {
+    font-family: var(--display);
+    font-size: 2.6em;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--ink-accent);
+    float: left;
+    line-height: 0.8;
+    margin-right: 6px;
+    margin-top: 4px;
+  }
+
+  /* Handwritten aside line */
+  .aside {
+    font-family: var(--hand);
+    color: var(--doodle);
+    font-size: clamp(17px, 3vw, 20px);
+    line-height: 1.4;
+    margin: -0.6rem 0 1.6rem 1.2em;
+    transform: rotate(-1.2deg);
+    opacity: 0.85;
+  }
+
+  .letter-close {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: clamp(16px, 3vw, 20px);
+    color: var(--ink-faded);
+    margin-top: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Para wrappers (for doodle positioning) */
+  .para-wrap { position: relative; }
+  .para-wrap .doodle { top: 6px; }
+
+  /* Doodles */
+  .doodle {
+    position: absolute;
+    left: -38px;
+    width: 26px;
+    height: 26px;
+    opacity: 0;
+    transform: scale(0.6) rotate(-12deg);
+    transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.34, 1.52, 0.64, 1);
+    pointer-events: none;
+  }
+  .doodle.visible {
+    opacity: 0.92;
+    transform: scale(1) rotate(0deg);
+  }
+  .para-wrap:nth-child(odd)  .doodle.visible { transform: scale(1) rotate(-6deg); }
+  .para-wrap:nth-child(even) .doodle.visible { transform: scale(1) rotate(8deg); }
+  @media (max-width: 520px) {
+    .doodle { left: -36px; width: 22px; height: 22px; }
+  }
+
+  /* Signature */
+  #signature-container {
+    width: clamp(180px, 45vw, 240px);
+    margin-top: 6px;
+    margin-left: 8px;
+  }
+  #sig-svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Keepsake — pressed flower at the end. Treated almost like
+     a small framed object on the page: soft halo, generous space,
+     slow gentle reveal so she arrives at it after reading. */
+  #keepsake {
+    margin-top: 3.5rem;
+    padding: 1.8rem 1rem 1.4rem;
+    text-align: center;
+    position: relative;
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+    transition: opacity 2s ease, transform 2s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  #keepsake.in {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  /* Soft warm halo behind the flower */
+  #keepsake::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(232, 168, 124, 0.18) 0%,
+      rgba(232, 168, 124, 0.08) 35%,
+      transparent 65%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+  #keepsake > * { position: relative; z-index: 1; }
+  #keepsake svg {
+    width: 84px;
+    height: 84px;
+    opacity: 0.85;
+    /* The flower itself draws in slowly */
+    animation: keepsakeBloom 2.4s ease-out 0.4s both;
+  }
+  @keyframes keepsakeBloom {
+    0%   { transform: scale(0.7) rotate(-3deg); opacity: 0; }
+    60%  { opacity: 0.9; }
+    100% { transform: scale(1) rotate(0deg); opacity: 0.85; }
+  }
+  #keepsake .keepsake-note {
+    font-family: var(--hand);
+    color: var(--doodle);
+    font-size: 22px;
+    margin-top: 12px;
+    transform: rotate(-1.5deg);
+    display: inline-block;
+    opacity: 0;
+    animation: keepsakeNoteIn 1.4s ease 1.8s forwards;
+  }
+  @keyframes keepsakeNoteIn {
+    from { opacity: 0; transform: rotate(-1.5deg) translateY(4px); }
+    to   { opacity: 1; transform: rotate(-1.5deg) translateY(0); }
+  }
+  /* Optional little date stamp under the note, like a pressed-flower diary */
+  #keepsake .keepsake-date {
+    display: block;
+    font-family: var(--display);
+    font-style: italic;
+    color: var(--ink-faded);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    margin-top: 6px;
+    opacity: 0;
+    animation: keepsakeNoteIn 1.4s ease 2.4s forwards;
+  }
+
+  /* vol mark + read again */
+  .vol-mark {
+    text-align: center;
+    color: var(--ink-faded);
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    margin-top: 28px;
+    opacity: 0;
+    transition: opacity 1s ease 0.4s;
+  }
+  #s-letter.in .vol-mark { opacity: 1; }
+  .tease {
+    text-align: center;
+    color: var(--ink-faded);
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    margin-top: 8px;
+    opacity: 0;
+    transition: opacity 1s ease 1.2s;
+  }
+  #s-letter.in .tease { opacity: 0.7; }
+
+  #read-again {
+    display: block;
+    margin: 18px auto 0;
+    background: transparent;
+    border: none;
+    color: var(--ink-accent);
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.8s ease 2s, color 0.2s ease;
+    padding: 4px 10px;
+  }
+  #s-letter.in #read-again { opacity: 0.85; }
+  #read-again:hover { color: var(--wax); }
+
+  /* ──────────────────────────────────────────────────────
+     REDUCED MOTION
+  ────────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    #panel-bottom {
+      transition: none;
+      transform: rotateX(0deg);
+      animation: none;
+    }
+    #panel-bottom.unfolded { animation: none; }
+    .doodle, .doodle.visible,
+    .seq, .seq.in,
+    #keepsake, #keepsake.in,
+    #wax-seal, #wax-seal.cracked .wax-half {
+      transition: none !important;
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    #fold-shadow { display: none; }
+    #wax-seal { display: none; }
+    .seal { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+  <button id="sound-toggle" type="button" title="Toggle sound" aria-label="Toggle sound">🔇</button>
+
+  <!-- ════════════ SCREEN 1: UNLOCK ════════════ -->
+  <div id="s-unlock">
+
+    <!-- Plum blossom tree (background, right side) -->
+    <svg id="blossom-tree" viewBox="0 0 400 700" xmlns="http://www.w3.org/2000/svg"
+         preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
+      <defs>
+        <radialGradient id="blossom-grad" cx="50%" cy="45%" r="55%">
+          <stop offset="0%"   stop-color="#ffe4ec"/>
+          <stop offset="55%"  stop-color="#f7b8c8"/>
+          <stop offset="100%" stop-color="#d68aa0"/>
+        </radialGradient>
+        <radialGradient id="blossom-center" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#fff4d0"/>
+          <stop offset="100%" stop-color="#c97a4a"/>
+        </radialGradient>
+
+        <!-- A single five-petal blossom, reused via <use> -->
+        <symbol id="blossom" viewBox="-12 -12 24 24" overflow="visible">
+          <g>
+            <ellipse cx="0" cy="-7"  rx="4.2" ry="6"  fill="url(#blossom-grad)"
+                     stroke="#b56577" stroke-width="0.4" stroke-opacity="0.5"/>
+            <ellipse cx="6.65" cy="-2.16" rx="4.2" ry="6"
+                     transform="rotate(72)"  fill="url(#blossom-grad)"
+                     stroke="#b56577" stroke-width="0.4" stroke-opacity="0.5"/>
+            <ellipse cx="4.11" cy="5.66" rx="4.2" ry="6"
+                     transform="rotate(144)" fill="url(#blossom-grad)"
+                     stroke="#b56577" stroke-width="0.4" stroke-opacity="0.5"/>
+            <ellipse cx="-4.11" cy="5.66" rx="4.2" ry="6"
+                     transform="rotate(216)" fill="url(#blossom-grad)"
+                     stroke="#b56577" stroke-width="0.4" stroke-opacity="0.5"/>
+            <ellipse cx="-6.65" cy="-2.16" rx="4.2" ry="6"
+                     transform="rotate(288)" fill="url(#blossom-grad)"
+                     stroke="#b56577" stroke-width="0.4" stroke-opacity="0.5"/>
+            <circle cx="0" cy="0" r="1.8" fill="url(#blossom-center)"/>
+            <!-- tiny stamens -->
+            <g stroke="#8b3a1a" stroke-width="0.4" stroke-linecap="round" opacity="0.7">
+              <line x1="0" y1="0" x2="0"   y2="-3"/>
+              <line x1="0" y1="0" x2="2.6" y2="-1.5"/>
+              <line x1="0" y1="0" x2="2.6" y2="1.5"/>
+              <line x1="0" y1="0" x2="-2.6" y2="1.5"/>
+              <line x1="0" y1="0" x2="-2.6" y2="-1.5"/>
+            </g>
+          </g>
+        </symbol>
+      </defs>
+
+      <!-- The trunk and branches -->
+      <g class="sway-slow">
+        <!-- Main trunk: dark warm brown, gnarled curve -->
+        <path d="M 380 700
+                 C 360 600, 340 520, 320 460
+                 C 305 410, 290 360, 270 310
+                 C 255 270, 245 230, 240 190
+                 C 238 160, 245 130, 260 100"
+              stroke="#3a2418" stroke-width="22" fill="none"
+              stroke-linecap="round"/>
+        <!-- Trunk highlight for dimensionality -->
+        <path d="M 378 690
+                 C 358 600, 340 520, 322 460
+                 C 308 412, 295 362, 278 312"
+              stroke="#5a3a26" stroke-width="6" fill="none"
+              stroke-linecap="round" opacity="0.7"/>
+
+        <!-- Major branches -->
+        <g class="sway">
+          <!-- Lower-left branch -->
+          <path d="M 320 460 C 280 440, 230 430, 180 410 C 150 395, 130 380, 110 360"
+                stroke="#3a2418" stroke-width="10" fill="none" stroke-linecap="round"/>
+          <path d="M 180 410 C 160 405, 140 395, 125 380"
+                stroke="#3a2418" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M 110 360 C 95 348, 80 340, 65 335"
+                stroke="#3a2418" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+          <!-- Mid branch reaching left -->
+          <path d="M 270 310 C 230 300, 190 290, 150 275 C 125 268, 105 260, 85 248"
+                stroke="#3a2418" stroke-width="8" fill="none" stroke-linecap="round"/>
+          <path d="M 150 275 C 130 268, 115 258, 100 245"
+                stroke="#3a2418" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path d="M 85 248 C 70 240, 55 235, 40 232"
+                stroke="#3a2418" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+          <!-- Upper branch reaching up-left -->
+          <path d="M 245 190 C 210 175, 175 160, 140 145 C 115 135, 95 125, 78 110"
+                stroke="#3a2418" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <path d="M 140 145 C 120 137, 105 130, 90 118"
+                stroke="#3a2418" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+          <!-- Top branches -->
+          <path d="M 260 100 C 240 80, 215 65, 190 55"
+                stroke="#3a2418" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path d="M 260 100 C 280 75, 305 60, 330 50"
+                stroke="#3a2418" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M 215 65 C 200 50, 180 40, 165 35"
+                stroke="#3a2418" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+          <!-- Right-side branches -->
+          <path d="M 290 360 C 320 350, 350 345, 380 340"
+                stroke="#3a2418" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M 240 190 C 270 175, 300 165, 330 158"
+                stroke="#3a2418" stroke-width="4" fill="none" stroke-linecap="round"/>
+        </g>
+
+        <!-- Blossoms scattered along the branches -->
+        <g class="blossoms">
+          <!-- Lower-left cluster -->
+          <use href="#blossom" x="180" y="410" width="22" height="22" class="bloom" style="animation-delay: 0s"/>
+          <use href="#blossom" x="155" y="400" width="18" height="18" class="bloom" style="animation-delay: 0.5s"/>
+          <use href="#blossom" x="130" y="385" width="20" height="20" class="bloom" style="animation-delay: 1s"/>
+          <use href="#blossom" x="110" y="362" width="16" height="16" class="bloom" style="animation-delay: 1.5s"/>
+          <use href="#blossom" x="88"  y="348" width="22" height="22" class="bloom" style="animation-delay: 2s"/>
+          <use href="#blossom" x="68"  y="335" width="18" height="18" class="bloom" style="animation-delay: 2.5s"/>
+
+          <!-- Mid branch cluster -->
+          <use href="#blossom" x="195" y="288" width="20" height="20" class="bloom" style="animation-delay: 0.3s"/>
+          <use href="#blossom" x="160" y="277" width="22" height="22" class="bloom" style="animation-delay: 0.8s"/>
+          <use href="#blossom" x="130" y="265" width="18" height="18" class="bloom" style="animation-delay: 1.3s"/>
+          <use href="#blossom" x="105" y="258" width="20" height="20" class="bloom" style="animation-delay: 1.8s"/>
+          <use href="#blossom" x="80"  y="246" width="16" height="16" class="bloom" style="animation-delay: 2.3s"/>
+          <use href="#blossom" x="55"  y="238" width="22" height="22" class="bloom" style="animation-delay: 2.8s"/>
+          <use href="#blossom" x="38"  y="232" width="18" height="18" class="bloom" style="animation-delay: 3.3s"/>
+
+          <!-- Upper-left branch cluster -->
+          <use href="#blossom" x="200" y="170" width="20" height="20" class="bloom" style="animation-delay: 0.2s"/>
+          <use href="#blossom" x="170" y="155" width="22" height="22" class="bloom" style="animation-delay: 0.7s"/>
+          <use href="#blossom" x="138" y="142" width="18" height="18" class="bloom" style="animation-delay: 1.2s"/>
+          <use href="#blossom" x="110" y="128" width="20" height="20" class="bloom" style="animation-delay: 1.7s"/>
+          <use href="#blossom" x="85"  y="115" width="16" height="16" class="bloom" style="animation-delay: 2.2s"/>
+
+          <!-- Top crown cluster -->
+          <use href="#blossom" x="245" y="105" width="22" height="22" class="bloom" style="animation-delay: 0.4s"/>
+          <use href="#blossom" x="225" y="78"  width="20" height="20" class="bloom" style="animation-delay: 0.9s"/>
+          <use href="#blossom" x="200" y="58"  width="18" height="18" class="bloom" style="animation-delay: 1.4s"/>
+          <use href="#blossom" x="178" y="42"  width="20" height="20" class="bloom" style="animation-delay: 1.9s"/>
+          <use href="#blossom" x="280" y="80"  width="22" height="22" class="bloom" style="animation-delay: 2.4s"/>
+          <use href="#blossom" x="308" y="62"  width="18" height="18" class="bloom" style="animation-delay: 2.9s"/>
+          <use href="#blossom" x="332" y="48"  width="20" height="20" class="bloom" style="animation-delay: 3.4s"/>
+
+          <!-- Right-side small cluster -->
+          <use href="#blossom" x="330" y="345" width="18" height="18" class="bloom" style="animation-delay: 0.6s"/>
+          <use href="#blossom" x="358" y="340" width="16" height="16" class="bloom" style="animation-delay: 1.1s"/>
+          <use href="#blossom" x="300" y="170" width="20" height="20" class="bloom" style="animation-delay: 1.6s"/>
+          <use href="#blossom" x="325" y="162" width="22" height="22" class="bloom" style="animation-delay: 2.1s"/>
+
+          <!-- A few near the trunk -->
+          <use href="#blossom" x="320" y="455" width="18" height="18" class="bloom" style="animation-delay: 1.0s"/>
+          <use href="#blossom" x="295" y="500" width="20" height="20" class="bloom" style="animation-delay: 2.0s"/>
+          <use href="#blossom" x="350" y="540" width="16" height="16" class="bloom" style="animation-delay: 3.0s"/>
+        </g>
+      </g>
+    </svg>
+
+    <!-- Falling petals layer -->
+    <div id="petals" aria-hidden="true"></div>
+
+    <div class="seal" aria-hidden="true">✉️</div>
+    <h1 class="u-title">A note for you</h1>
+    <p class="u-sub">a long one. take your time. bring tea</p>
+
+    <label for="kf" style="position:absolute;left:-9999px;">Password</label>
+    <input id="kf" class="kfield" type="password" autocomplete="off"
+           autocapitalize="off" spellcheck="false" placeholder="…"
+           aria-describedby="u-hint" />
+    <button id="unlock-btn" class="obtn" type="button">Open</button>
+    <div id="u-hint" class="u-hint" role="status" aria-live="polite"></div>
+    <div id="u-memory" class="u-memory"></div>
+  </div>
+
+  <!-- ════════════ SCREEN 2: LETTER ════════════ -->
+  <div id="s-letter" style="display:none;">
+    <div id="linen-bg">
+      <div id="fold-wrapper" class="closed">
+
+        <!-- TOP PANEL -->
+        <div id="panel-top" class="panel">
+          <div class="panel-inner">
+            <div class="letter-date seq"></div>
+
+            <!-- Handwritten salutation (drawn via JS) -->
+            <svg id="salutation-svg" viewBox="0 0 280 50" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path id="sal-path" d=""/>
+            </svg>
+
+            <div class="para-wrap seq">
+              <!-- star -->
+              <svg class="doodle" viewBox="0 0 30 30">
+                <path d="M15 3 L17.5 11 L26 11 L19.5 16.5 L22 24.5 L15 19.5 L8 24.5 L10.5 16.5 L4 11 L12.5 11 Z"
+                      stroke="var(--doodle)" stroke-width="1.2" fill="none"
+                      stroke-linejoin="round" stroke-linecap="round"/>
+              </svg>
+              <p class="letter-para"></p>
+            </div>
+
+            <div class="para-wrap seq">
+              <!-- moon -->
+              <svg class="doodle" viewBox="0 0 30 30">
+                <path d="M20 8 A10 10 0 1 0 20 22 A6 6 0 1 1 20 8 Z"
+                      stroke="var(--doodle)" stroke-width="1.2" fill="none"
+                      stroke-linecap="round"/>
+              </svg>
+              <p class="letter-para"></p>
+            </div>
+
+            <div class="para-wrap seq">
+              <!-- flower -->
+              <svg class="doodle" viewBox="0 0 30 30">
+                <circle cx="15" cy="15" r="3" stroke="var(--doodle)" stroke-width="1.2" fill="none"/>
+                <ellipse cx="15" cy="8"  rx="2.5" ry="4" stroke="var(--doodle)" stroke-width="1.2" fill="none"/>
+                <ellipse cx="15" cy="22" rx="2.5" ry="4" stroke="var(--doodle)" stroke-width="1.2" fill="none"/>
+                <ellipse cx="8"  cy="15" rx="4" ry="2.5" stroke="var(--doodle)" stroke-width="1.2" fill="none"/>
+                <ellipse cx="22" cy="15" rx="4" ry="2.5" stroke="var(--doodle)" stroke-width="1.2" fill="none"/>
+              </svg>
+              <p class="letter-para"></p>
+            </div>
+          </div>
+          <div id="fold-crease"></div>
+
+          <!-- The wax seal that cracks open -->
+          <svg id="wax-seal" viewBox="0 0 68 68" xmlns="http://www.w3.org/2000/svg" aria-label="Wax seal, tap to open">
+            <defs>
+              <radialGradient id="wax-grad" cx="40%" cy="35%" r="65%">
+                <stop offset="0%"  stop-color="#c4724a"/>
+                <stop offset="60%" stop-color="#8b2818"/>
+                <stop offset="100%" stop-color="#5a1808"/>
+              </radialGradient>
+              <clipPath id="left-clip">
+                <rect x="0" y="0" width="34" height="68"/>
+              </clipPath>
+              <clipPath id="right-clip">
+                <rect x="34" y="0" width="34" height="68"/>
+              </clipPath>
+            </defs>
+
+            <!-- Left half of the seal -->
+            <g class="wax-half wax-left" clip-path="url(#left-clip)">
+              <circle cx="34" cy="34" r="28" fill="url(#wax-grad)" stroke="#3a0e04" stroke-width="0.8"/>
+              <!-- decorative scallop edge bumps -->
+              <circle cx="10" cy="34" r="2.5" fill="#8b2818"/>
+              <circle cx="16" cy="14" r="2.5" fill="#8b2818"/>
+              <circle cx="16" cy="54" r="2.5" fill="#8b2818"/>
+              <!-- monogram-like swirl -->
+              <path d="M22 26 Q34 18 30 34 Q26 46 34 42"
+                    stroke="#3a0e04" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+            </g>
+            <!-- Right half of the seal -->
+            <g class="wax-half wax-right" clip-path="url(#right-clip)">
+              <circle cx="34" cy="34" r="28" fill="url(#wax-grad)" stroke="#3a0e04" stroke-width="0.8"/>
+              <circle cx="58" cy="34" r="2.5" fill="#8b2818"/>
+              <circle cx="52" cy="14" r="2.5" fill="#8b2818"/>
+              <circle cx="52" cy="54" r="2.5" fill="#8b2818"/>
+              <path d="M34 42 Q42 38 38 34 Q34 30 42 24"
+                    stroke="#3a0e04" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+            </g>
+          </svg>
+        </div>
+
+        <div id="open-hint">tap the seal to open</div>
+
+        <!-- BOTTOM PANEL -->
+        <div id="panel-bottom" class="panel">
+          <div id="fold-shadow"></div>
+          <div class="panel-inner">
+
+            <div class="para-wrap">
+              <!-- heart -->
+              <svg class="doodle" viewBox="0 0 30 30">
+                <path d="M15 24 C15 24 4 16 4 10 A6 6 0 0 1 15 8 A6 6 0 0 1 26 10 C26 16 15 24 15 24 Z"
+                      stroke="var(--doodle)" stroke-width="1.2" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p class="letter-para"></p>
+            </div>
+
+            <div class="para-wrap">
+              <!-- envelope -->
+              <svg class="doodle" viewBox="0 0 30 30">
+                <rect x="4" y="8" width="22" height="15" rx="1.5"
+                      stroke="var(--doodle)" stroke-width="1.2" fill="none"/>
+                <path d="M4 8 L15 17 L26 8"
+                      stroke="var(--doodle)" stroke-width="1.2" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p class="letter-para"></p>
+            </div>
+
+            <div class="para-wrap">
+              <!-- star (again) -->
+              <svg class="doodle" viewBox="0 0 30 30">
+                <path d="M15 3 L17.5 11 L26 11 L19.5 16.5 L22 24.5 L15 19.5 L8 24.5 L10.5 16.5 L4 11 L12.5 11 Z"
+                      stroke="var(--doodle)" stroke-width="1.2" fill="none"
+                      stroke-linejoin="round" stroke-linecap="round"/>
+              </svg>
+              <p class="letter-para"></p>
+            </div>
+
+            <div class="letter-close">with all my love,</div>
+
+            <div id="signature-container">
+              <svg id="sig-svg" viewBox="0 0 260 80" fill="none"
+                   xmlns="http://www.w3.org/2000/svg" overflow="visible" aria-hidden="true">
+                <path id="sig-path"
+                  d="M8,52
+                     C 14,30 22,18 30,28
+                     C 34,34 30,52 24,56
+                     C 20,58 18,52 22,46
+                     C 28,38 38,32 46,40
+                     C 52,46 46,58 40,58
+                     C 36,58 36,52 40,48
+                     C 48,40 58,36 64,42
+                     C 68,46 66,54 60,56
+                     C 56,57 54,52 58,46
+                     C 66,36 78,32 86,38
+                     C 92,42 90,52 84,56
+                     C 80,58 76,54 80,48
+                     C 88,38 100,34 110,40
+                     C 116,44 116,54 110,58
+                     C 105,61 100,56 104,50
+                     C 112,40 124,36 134,40
+                     C 142,44 142,54 134,58
+                     C 130,60 126,55 130,50
+                     C 138,40 152,38 162,44
+                     C 170,49 170,58 162,62
+                     C 156,64 152,58 158,52
+                     C 168,42 184,42 196,48
+                     C 204,52 204,60 196,62
+                     C 192,63 190,58 196,54
+                     C 208,46 224,48 232,56
+                     C 238,62 236,72 228,72
+                     C 222,72 220,66 226,62
+                     C 234,58 244,58 252,64"
+                  stroke="var(--doodle)"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  fill="none"/>
+                <path id="sig-flourish"
+                  d="M30,74 C 80,70 160,70 230,74"
+                  stroke="var(--doodle)"
+                  stroke-width="1.2"
+                  stroke-linecap="round"
+                  fill="none"
+                  opacity="0.55"/>
+                <circle id="pen-tip" r="3" fill="var(--doodle)" opacity="0"/>
+              </svg>
+            </div>
+
+            <!-- Keepsake: a pressed-flower image she can screenshot -->
+            <div id="keepsake" aria-hidden="true">
+              <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                <g stroke="var(--doodle)" stroke-width="1.1" fill="none" stroke-linecap="round">
+                  <line x1="40" y1="40" x2="40" y2="74"/>
+                  <path d="M40 60 Q34 56 32 50" />
+                  <path d="M40 66 Q46 62 48 56" />
+                  <ellipse cx="40" cy="30" rx="6" ry="9" fill="rgba(196,114,74,0.18)"/>
+                  <ellipse cx="30" cy="34" rx="6" ry="9" transform="rotate(-50 30 34)" fill="rgba(196,114,74,0.18)"/>
+                  <ellipse cx="50" cy="34" rx="6" ry="9" transform="rotate( 50 50 34)" fill="rgba(196,114,74,0.18)"/>
+                  <ellipse cx="32" cy="44" rx="6" ry="9" transform="rotate(-110 32 44)" fill="rgba(196,114,74,0.18)"/>
+                  <ellipse cx="48" cy="44" rx="6" ry="9" transform="rotate( 110 48 44)" fill="rgba(196,114,74,0.18)"/>
+                  <circle cx="40" cy="37" r="3" fill="var(--doodle)" opacity="0.5"/>
+                </g>
+              </svg>
+              <div class="keepsake-note">pressed for you</div>
+              <span class="keepsake-date"></span>
+            </div>
+
+            <div class="vol-mark"></div>
+            <div class="tease"></div>
+
+            <button id="read-again" type="button">↺  read again</button>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+'use strict';
+
+/* ══ 1. CONTENT DATA ════════════════════════════════════ */
+const REAL_KEY  = "sunshine";
+const DECOY_KEY = "hello";
+
+// The subtitle shown under "A note for you" on the unlock screen.
+// For longer letters, something like "a long one. take your time." sets the pace.
+const UNLOCK_HINT = "a long one. take your time. bring tea";
+
+const CONTENT = {
+  real: {
+    date:        "Monday, 2nd June",
+    salutation:  "My love,",
+    paragraphs: [
+      "I have been thinking carefully about what to say and how to say it. So please read this slowly.and understand that every word here comes from a sincere place.",
+      "First I want to apologize. I know you don't like me saying thank you and sorry too much, but I want to say more deeply this time. What I said to you that day was inappropriate and disrespectful. You deserved better than that from me. Regardless of the feelings I have for you, that was not the right way to express them and I am truly sorry. You did not deserve to be spoken to that way and you certainly did not deserve to be shouted at because of something I said. That has stayed with me. It still hurts me knowing that you went through that because of my words.",
+      "Now I want to explain something and I need you to understand it clearly. I am pulling back. Not because I don't care about you anymore. Not because my feelings for you have changed. Not because I have given up or lost interest. I am pulling back because I care about you too much to keep doing things the wrong way.",
+      "Right now the way we have been talking, the late nights, the intensity, the things that need to stay hidden - it is putting you in a difficult position at home. And I refuse to keep being the reason you go through pain under your own roof. You should feel peace at home, not talking and shouting because of me.",
+      "I also have to be honest with myself. I have not been handling this the right way. And a person who genuinely wants something real and lasting has to be willing to do things properly, even when it is hard. Espectially when it is hard",
+      "So what do I mean when I say I'm pulling back? It means I will still be warm and respectful towards you, I'll still care for you. It means I still have hopes for something real in the future and when the time is right and your people like me better",
+      "But it means no more conversations that we would be unncomfortable with others seeing. No more intensity that puts you in a difficult position at home. We'll it'll be easy for you to do so I think I am the one who needs to be careful here so I don't initiate such conversations. I don't know when I'm with you all that I think about is not cool. I want to be a proper person to your peaple. I honestly don't know why they don't like me but I want to be a good person for them to see. For that to happen I must not give them any reason to critisize me anymore.",
+      "If what exists between us is real, and I believe it is, then it can survive being done the right way. In fact doing it the right way is the only thing that gives it a real chance of lasting.",
+      "You have been understanding and patient through all of this and I do not take that lightly. It tells me a lot about who you are and that is exactly why you deserve someone who will handle your heart with care, not carelessness. I am choosing to become that person. Even if it takes time",
+      "So please do not read my silence or distance as rejectiion. Read is as me not wanting to cause trouble anymore I want you to have peace. You matter to me Britney. That has not changed. And it will not change",
+      "And if today is hard, remember: I am thinking of you exactly now."
+    ],
+    // Handwritten margin notes, keyed by paragraph index (0-based).
+    // Sprinkle as many as you like — they appear right under that paragraph.
+    asides: {
+      1: "(Brace yourself, It's about to get serious)",
+      3: "(I rewrote this one three times)",
+      5: "(Your people don't like me too much)",
+      6: "(Which means I'll not say I love you or anything or sorts. Even though I do love you)",
+      8: "(Everything above this, true)",
+      9: "(I know, I know, I'm so cool saying that - allow me 😎😎)"
+    },
+    closing: "with all my love,",
+    keepsakeNote: "pressed for you",
+    volMark: "— vol. i —",
+    tease:   "vol. ii arrives sunday"
+  },
+  decoy: {
+    date:        "Mon 2 Jun",
+    salutation:  "Hey!",
+    paragraphs: [
+      "Just wanted to send a quick hello — hope your week is starting off okay and that the rain held off this morning.",
+      "I finally finished that book you recommended, by the way. The middle dragged a bit but the ending really did get me. Lend me another one when you have a moment.",
+      "Also: I was thinking of trying that little café near the bookshop on Saturday around eleven, if you're free. No pressure at all though.",
+      "Tell your mum I said hi when you next ring her.",
+      "Anyway, that was the whole reason for the message. Nothing urgent.",
+      "Have a good one."
+    ],
+    asides:  {},
+    closing: "talk soon,",
+    keepsakeNote: "",
+    volMark: "",
+    tease:   ""
+  }
+};
+
+const STORAGE_KEY = 'unfolding-note-vol-i';
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ══ 2. AUDIO ENGINE (synthesized, no external files) ══ */
+const audio = {
+  ctx: null,
+  enabled: false,
+  ensure() {
+    if (!this.ctx) {
+      try {
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) { return false; }
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    return true;
+  },
+  // Paper rustle — short burst of filtered noise
+  rustle(duration = 0.7) {
+    if (!this.enabled || !this.ensure()) return;
+    const ctx = this.ctx;
+    const buf = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      // pink-ish noise with decay
+      const t = i / data.length;
+      const envelope = Math.sin(Math.PI * t) * (1 - t * 0.3);
+      data[i] = (Math.random() * 2 - 1) * envelope;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 2400;
+    filter.Q.value = 0.8;
+    const gain = ctx.createGain();
+    gain.gain.value = 0.12;
+    src.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+    src.start();
+  },
+  // Pen scratch — soft loop of high-frequency noise during signature draw
+  scratch(duration = 2.2) {
+    if (!this.enabled || !this.ensure()) return;
+    const ctx = this.ctx;
+    const buf = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      const t = i / data.length;
+      // pulsing scratch — pen moves and lifts
+      const pulse = 0.5 + 0.5 * Math.sin(t * 80 + Math.sin(t * 12) * 3);
+      const envelope = Math.min(1, t * 8) * (1 - Math.max(0, (t - 0.85) / 0.15));
+      data[i] = (Math.random() * 2 - 1) * envelope * pulse * 0.4;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 3500;
+    const gain = ctx.createGain();
+    gain.gain.value = 0.05;
+    src.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+    src.start();
+  },
+  // Soft crack — the wax breaking
+  crack() {
+    if (!this.enabled || !this.ensure()) return;
+    const ctx = this.ctx;
+    const dur = 0.18;
+    const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      const t = i / data.length;
+      const env = Math.exp(-t * 14);
+      data[i] = (Math.random() * 2 - 1) * env;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 1200;
+    const gain = ctx.createGain();
+    gain.gain.value = 0.18;
+    src.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+    src.start();
+  }
+};
+
+/* ══ FALLING PETALS ═════════════════════════════════════ */
+const petalSvg = `
+<svg viewBox="-12 -12 24 24" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+  <defs>
+    <radialGradient id="pg-PG" cx="40%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="#fff0f4"/>
+      <stop offset="60%"  stop-color="#f7b8c8"/>
+      <stop offset="100%" stop-color="#d68aa0"/>
+    </radialGradient>
+  </defs>
+  <path d="M 0 -10
+           C 5 -8, 7 -3, 5 2
+           C 3 6, -3 6, -5 2
+           C -7 -3, -5 -8, 0 -10 Z"
+        fill="url(#pg-PG)"
+        stroke="#b56577" stroke-width="0.3" stroke-opacity="0.5"/>
+  <path d="M 0 -8 Q 1 0 0 4"
+        stroke="#a85068" stroke-width="0.3" fill="none" opacity="0.4"/>
+</svg>`;
+
+let petalsActive = false;
+let petalSpawnTimer = null;
+
+function spawnPetal() {
+  const container = document.getElementById('petals');
+  if (!container) return;
+  const petal = document.createElement('div');
+  petal.className = 'petal';
+
+  // Random size, position, drift, spin, duration
+  const size      = 10 + Math.random() * 12;          // 10–22px
+  const startX    = Math.random() * 100;              // % across viewport
+  const drift     = (Math.random() * 200 - 100);      // -100 to +100px horizontal drift
+  const spin      = 180 + Math.random() * 720;        // 180°–900° rotation total
+  const duration  = 9 + Math.random() * 8;            // 9–17s fall time
+  const delay     = Math.random() * 1.5;              // small stagger
+  const startRot  = Math.random() * 360;
+
+  petal.style.left   = startX + '%';
+  petal.style.width  = size + 'px';
+  petal.style.height = size + 'px';
+  petal.style.setProperty('--drift', drift + 'px');
+  petal.style.setProperty('--spin', (startRot + spin) + 'deg');
+  petal.style.transform = `rotate(${startRot}deg)`;
+  petal.style.animation = `petalFall ${duration}s linear ${delay}s forwards`;
+  petal.innerHTML = petalSvg;
+  // Make each petal's gradient id unique so they don't all reference the same one
+  const uid = 'pg-' + Math.random().toString(36).slice(2, 8);
+  petal.innerHTML = petal.innerHTML.replaceAll('pg-PG', uid);
+
+  container.appendChild(petal);
+
+  // Clean up after the petal finishes its fall
+  setTimeout(() => {
+    if (petal.parentNode) petal.parentNode.removeChild(petal);
+  }, (duration + delay + 0.5) * 1000);
+}
+
+function startPetals() {
+  if (petalsActive) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  petalsActive = true;
+
+  // Seed a few at varied positions in their fall so the screen isn't empty at start
+  for (let i = 0; i < 8; i++) {
+    setTimeout(spawnPetal, i * 400);
+  }
+
+  // Then keep spawning at a gentle rate
+  const tick = () => {
+    if (!petalsActive) return;
+    spawnPetal();
+    petalSpawnTimer = setTimeout(tick, 700 + Math.random() * 900); // 0.7–1.6s between petals
+  };
+  petalSpawnTimer = setTimeout(tick, 1200);
+}
+
+function stopPetals() {
+  petalsActive = false;
+  if (petalSpawnTimer) clearTimeout(petalSpawnTimer);
+}
+
+function initSoundToggle() {
+  const btn = document.getElementById('sound-toggle');
+  btn.addEventListener('click', () => {
+    audio.enabled = !audio.enabled;
+    if (audio.enabled) {
+      audio.ensure();
+      btn.textContent = '🔊';
+      btn.classList.add('on');
+    } else {
+      btn.textContent = '🔇';
+      btn.classList.remove('on');
+    }
+  });
+}
+
+/* ══ 3. UNLOCK SCREEN ═══════════════════════════════════ */
+function tryUnlock() {
+  const field = document.getElementById('kf');
+  const val = field.value.trim().toLowerCase();
+
+  if (val === REAL_KEY.toLowerCase()) {
+    triggerReveal('real');
+  } else if (val === DECOY_KEY.toLowerCase()) {
+    triggerReveal('decoy');
+  } else {
+    showError();
+  }
+}
+
+function showError() {
+  const field = document.getElementById('kf');
+  const hint  = document.getElementById('u-hint');
+  field.classList.remove('shake');
+  void field.offsetWidth;
+  field.classList.add('shake');
+  hint.textContent = "that isn't the word";
+  setTimeout(() => { hint.textContent = ''; }, 2200);
+}
+
+function showMemory() {
+  const mem = document.getElementById('u-memory');
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data.lastOpened) return;
+    const days = Math.floor((Date.now() - data.lastOpened) / (1000 * 60 * 60 * 24));
+    let when;
+    if (days === 0) when = 'today';
+    else if (days === 1) when = 'yesterday';
+    else when = days + ' days ago';
+    mem.textContent = `opened ${data.count > 1 ? data.count + ' times' : 'once'} · last ${when}`;
+  } catch (e) { /* no-op */ }
+}
+
+function recordOpen(mode) {
+  if (mode !== 'real') return;  // only remember real opens
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const data = raw ? JSON.parse(raw) : { count: 0 };
+    data.count = (data.count || 0) + 1;
+    data.lastOpened = Date.now();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) { /* no-op */ }
+}
+
+/* ══ 4. REVEAL SEQUENCE ═════════════════════════════════ */
+function triggerReveal(mode) {
+  const unlock = document.getElementById('s-unlock');
+  const letter = document.getElementById('s-letter');
+
+  unlock.classList.add('out');
+  letter.setAttribute('data-mode', mode);
+  letter.style.display = 'block';
+
+  loadLetterContent(mode);
+  recordOpen(mode);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => letter.classList.add('in'));
+  });
+
+  setTimeout(() => {
+    unlock.style.display = 'none';
+    stopPetals();
+  }, 800);
+
+  // Show the closed note with wax seal, then let her tap to open
+  setTimeout(() => {
+    document.getElementById('open-hint').classList.add('show');
+    if (reducedMotion) {
+      // Skip the seal interaction in reduced-motion mode
+      beginUnfoldSequence(mode);
+    } else {
+      armWaxSeal(mode);
+    }
+  }, 700);
+}
+
+function armWaxSeal(mode) {
+  const seal = document.getElementById('wax-seal');
+  const top  = document.getElementById('panel-top');
+  const hint = document.getElementById('open-hint');
+  let opened = false;
+  const open = (e) => {
+    if (opened) return;
+    opened = true;
+    if (e) e.stopPropagation();
+    seal.removeEventListener('click', open);
+    top.removeEventListener('click', open);
+    top.style.cursor = '';
+    audio.crack();
+    seal.classList.add('cracked');
+    hint.classList.remove('show');
+    setTimeout(() => { seal.style.opacity = '0'; }, 400);
+    setTimeout(() => beginUnfoldSequence(mode), 350);
+  };
+  seal.addEventListener('click', open);
+  // Tapping anywhere on the closed note also opens it
+  top.style.cursor = 'pointer';
+  top.addEventListener('click', open);
+}
+
+function beginUnfoldSequence(mode) {
+  unfoldLetter();
+  // Sequenced fade-in of top-panel content during/after unfold
+  setTimeout(() => sequenceTopPanel(), 250);
+  // Draw handwritten salutation right when the top settles
+  setTimeout(() => drawSalutation(), 600);
+  // Start observing top doodles
+  setTimeout(() => initDoodleObserver('top'), 1000);
+  // Start observing bottom doodles a beat later (creates pacing between halves)
+  setTimeout(() => initDoodleObserver('bottom'), 1800);
+  // Signature observer
+  setTimeout(() => initSignatureAnimation(), 1200);
+}
+
+/* ══ 5. LETTER POPULATION ═══════════════════════════════ */
+
+// SVG markup for each doodle type, used when we need to spawn extra
+// paragraph wrappers beyond the 6 hard-coded ones.
+const DOODLE_SVGS = [
+  // star
+  `<svg class="doodle" viewBox="0 0 30 30">
+     <path d="M15 3 L17.5 11 L26 11 L19.5 16.5 L22 24.5 L15 19.5 L8 24.5 L10.5 16.5 L4 11 L12.5 11 Z"
+           stroke="var(--doodle)" stroke-width="1.2" fill="none"
+           stroke-linejoin="round" stroke-linecap="round"/>
+   </svg>`,
+  // moon
+  `<svg class="doodle" viewBox="0 0 30 30">
+     <path d="M20 8 A10 10 0 1 0 20 22 A6 6 0 1 1 20 8 Z"
+           stroke="var(--doodle)" stroke-width="1.2" fill="none"
+           stroke-linecap="round"/>
+   </svg>`,
+  // flower
+  `<svg class="doodle" viewBox="0 0 30 30">
+     <circle cx="15" cy="15" r="3" stroke="var(--doodle)" stroke-width="1.2" fill="none"/>
+     <ellipse cx="15" cy="8"  rx="2.5" ry="4" stroke="var(--doodle)" stroke-width="1.2" fill="none"/>
+     <ellipse cx="15" cy="22" rx="2.5" ry="4" stroke="var(--doodle)" stroke-width="1.2" fill="none"/>
+     <ellipse cx="8"  cy="15" rx="4" ry="2.5" stroke="var(--doodle)" stroke-width="1.2" fill="none"/>
+     <ellipse cx="22" cy="15" rx="4" ry="2.5" stroke="var(--doodle)" stroke-width="1.2" fill="none"/>
+   </svg>`,
+  // heart
+  `<svg class="doodle" viewBox="0 0 30 30">
+     <path d="M15 24 C15 24 4 16 4 10 A6 6 0 0 1 15 8 A6 6 0 0 1 26 10 C26 16 15 24 15 24 Z"
+           stroke="var(--doodle)" stroke-width="1.2" fill="none"
+           stroke-linecap="round" stroke-linejoin="round"/>
+   </svg>`,
+  // envelope
+  `<svg class="doodle" viewBox="0 0 30 30">
+     <rect x="4" y="8" width="22" height="15" rx="1.5"
+           stroke="var(--doodle)" stroke-width="1.2" fill="none"/>
+     <path d="M4 8 L15 17 L26 8"
+           stroke="var(--doodle)" stroke-width="1.2" fill="none"
+           stroke-linecap="round" stroke-linejoin="round"/>
+   </svg>`
+];
+
+// Small helper — HTML-escape user-provided strings before inserting via innerHTML.
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function loadLetterContent(mode) {
+  const c = CONTENT[mode];
+  document.querySelector('.letter-date').textContent  = c.date;
+  document.querySelector('.letter-close').textContent = c.closing;
+  document.querySelector('.vol-mark').textContent     = c.volMark;
+  document.querySelector('.tease').textContent        = c.tease;
+
+  // Update the unlock subtitle text (set once on load)
+  const sub = document.querySelector('.u-sub');
+  if (sub) sub.textContent = UNLOCK_HINT;
+
+  // Update the keepsake note (the small handwritten "pressed for you" line)
+  const kNote = document.querySelector('#keepsake .keepsake-note');
+  if (kNote) kNote.textContent = c.keepsakeNote || '';
+  // The date stamp echoes the letter date, in small caps-style italic
+  const kDate = document.querySelector('#keepsake .keepsake-date');
+  if (kDate) kDate.textContent = c.date ? `· ${c.date} ·` : '';
+
+  // Store salutation text on the SVG element for drawSalutation()
+  document.getElementById('salutation-svg').dataset.text = c.salutation;
+
+  // ── First, remove any extras we may have created on a previous open
+  document.querySelectorAll('.para-wrap.extra').forEach(el => el.remove());
+  document.querySelectorAll('.aside').forEach(el => el.remove());
+
+  const asides = c.asides || {};
+
+  // Fill the 6 built-in slots
+  const builtIn = document.querySelectorAll('.para-wrap:not(.extra)');
+  builtIn.forEach((wrap, i) => {
+    const para = wrap.querySelector('.letter-para');
+    const text = c.paragraphs[i] || '';
+    para.textContent = text;
+    wrap.style.display = text ? '' : 'none';
+
+    // If this paragraph has an aside, append a fresh .aside element after the <p>
+    if (text && asides[i]) {
+      const aside = document.createElement('div');
+      aside.className = 'aside';
+      // Random slight tilt so multiple asides don't all lean the same way
+      const tilt = (i % 2 === 0) ? '-1.2deg' : '1.4deg';
+      aside.style.transform = `rotate(${tilt})`;
+      aside.textContent = asides[i];
+      wrap.appendChild(aside);
+    }
+  });
+
+  // For paragraphs 7, 8, 9... create new wraps in the bottom panel.
+  // Insert them BEFORE the .letter-close (which sits above the signature).
+  const bottomInner = document.querySelector('#panel-bottom .panel-inner');
+  const close       = bottomInner.querySelector('.letter-close');
+
+  for (let i = 6; i < c.paragraphs.length; i++) {
+    const text = c.paragraphs[i];
+    if (!text) continue;
+    const wrap = document.createElement('div');
+    wrap.className = 'para-wrap extra';
+    let html = DOODLE_SVGS[i % DOODLE_SVGS.length] +
+      `<p class="letter-para">${esc(text)}</p>`;
+    if (asides[i]) {
+      const tilt = (i % 2 === 0) ? '-1.2deg' : '1.4deg';
+      html += `<div class="aside" style="transform: rotate(${tilt})">${esc(asides[i])}</div>`;
+    }
+    wrap.innerHTML = html;
+    bottomInner.insertBefore(wrap, close);
+  }
+
+  // Hide keepsake on decoy mode (or when no keepsake note is set)
+  document.getElementById('keepsake').style.display =
+    (mode === 'real' && c.keepsakeNote) ? '' : 'none';
+}
+
+/* ══ 6. FOLD ANIMATION ═══════════════════════════════════ */
+function unfoldLetter() {
+  const wrapper = document.getElementById('fold-wrapper');
+  const bottom  = document.getElementById('panel-bottom');
+  wrapper.classList.remove('closed');
+  setTimeout(() => {
+    audio.rustle(0.9);
+    bottom.classList.add('unfolded');
+  }, 100);
+}
+
+function sequenceTopPanel() {
+  const items = document.querySelectorAll('#panel-top .seq');
+  items.forEach((el, i) => {
+    setTimeout(() => el.classList.add('in'), i * 220);
+  });
+}
+
+/* ══ 7. HANDWRITTEN SALUTATION (drawn) ══════════════════ */
+function drawSalutation() {
+  const svg  = document.getElementById('salutation-svg');
+  const path = document.getElementById('sal-path');
+  const text = svg.dataset.text || '';
+
+  // Generate a flowing cursive-like path from the text.
+  // This is not real handwriting recognition — it's a stylized stand-in
+  // that varies per character to feel hand-drawn.
+  const d = generateCursivePath(text);
+  path.setAttribute('d', d);
+
+  if (reducedMotion) return;
+
+  const length = path.getTotalLength();
+  path.style.strokeDasharray  = length;
+  path.style.strokeDashoffset = length;
+  // force layout
+  void path.getBoundingClientRect();
+  path.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(0.5, 0.05, 0.4, 1)';
+  path.style.strokeDashoffset = '0';
+}
+
+// Build a continuous wavy path that suggests cursive letters.
+// Output viewBox is 280 wide × 50 tall, baseline ~32.
+function generateCursivePath(text) {
+  if (!text) return '';
+  const baseline = 32;
+  const charW = 14;
+  const startX = 4;
+  let d = `M ${startX} ${baseline}`;
+  let x = startX;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === ' ') {
+      x += charW * 0.6;
+      d += ` L ${x} ${baseline}`;
+      continue;
+    }
+    if (ch === ',') {
+      d += ` q 2 4 0 8`;
+      x += 4;
+      continue;
+    }
+    // pseudo-random but deterministic wave per char
+    const seed = ch.charCodeAt(0);
+    const dipUp  = -8 - (seed % 7);
+    const dipDn  = 4 + ((seed * 3) % 6);
+    const c1x = x + 3, c1y = baseline + dipUp;
+    const c2x = x + 9, c2y = baseline + dipDn * 0.4;
+    const ex  = x + charW, ey = baseline + ((seed % 3) - 1);
+    d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${ex} ${ey}`;
+    x = ex;
+  }
+  return d;
+}
+
+/* ══ 8. DOODLES ══════════════════════════════════════════ */
+function initDoodleObserver(scope) {
+  const root = scope === 'top'
+    ? document.querySelectorAll('#panel-top .para-wrap')
+    : document.querySelectorAll('#panel-bottom .para-wrap');
+
+  if (reducedMotion) {
+    root.forEach(el => {
+      const d = el.querySelector('.doodle');
+      if (d) d.classList.add('visible');
+    });
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const doodle = entry.target.querySelector('.doodle');
+          if (doodle) setTimeout(() => doodle.classList.add('visible'), 220);
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.3, rootMargin: '0px 0px -40px 0px' }
+  );
+  root.forEach(el => {
+    if (el.style.display !== 'none') observer.observe(el);
+  });
+}
+
+/* ══ 9. SIGNATURE ════════════════════════════════════════ */
+function initSignatureAnimation() {
+  const path     = document.getElementById('sig-path');
+  const flourish = document.getElementById('sig-flourish');
+  const penTip   = document.getElementById('pen-tip');
+  const length   = path.getTotalLength();
+  const flourLen = flourish.getTotalLength();
+
+  path.style.strokeDasharray  = length;
+  path.style.strokeDashoffset = length;
+  path.style.transition       = 'none';
+
+  flourish.style.strokeDasharray  = flourLen;
+  flourish.style.strokeDashoffset = flourLen;
+  flourish.style.transition       = 'none';
+
+  if (reducedMotion) {
+    path.style.strokeDashoffset = '0';
+    flourish.style.strokeDashoffset = '0';
+    revealKeepsake();
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          drawSignature(path, penTip, length, flourish, flourLen);
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.5 }
+  );
+  observer.observe(document.getElementById('signature-container'));
+}
+
+function drawSignature(path, penTip, length, flourish, flourLen) {
+  const duration = 2400;
+  const start    = performance.now();
+  penTip.style.opacity = '1';
+  audio.scratch(duration / 1000);
+
+  function frame(now) {
+    const elapsed  = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = progress < 0.5
+      ? 2 * progress * progress
+      : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+    path.style.strokeDashoffset = length * (1 - eased);
+    const point = path.getPointAtLength(length * eased);
+    penTip.setAttribute('cx', point.x);
+    penTip.setAttribute('cy', point.y);
+
+    if (progress < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      penTip.style.transition = 'opacity 0.4s ease';
+      penTip.style.opacity = '0';
+      drawFlourish(flourish, flourLen);
+      setTimeout(revealKeepsake, 600);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+function drawFlourish(flourish, flourLen) {
+  const duration = 700;
+  const start    = performance.now();
+  function frame(now) {
+    const elapsed  = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    flourish.style.strokeDashoffset = flourLen * (1 - eased);
+    if (progress < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+function revealKeepsake() {
+  const k = document.getElementById('keepsake');
+  if (k && k.style.display !== 'none') k.classList.add('in');
+}
+
+/* ══ 10. READ AGAIN ═════════════════════════════════════ */
+function readAgain() {
+  // Re-fold the bottom panel, reset everything, scroll up, replay.
+  const mode = document.getElementById('s-letter').getAttribute('data-mode');
+  const bottom = document.getElementById('panel-bottom');
+  const seal   = document.getElementById('wax-seal');
+  const wrapper = document.getElementById('fold-wrapper');
+
+  // Scroll up smoothly
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Reset doodles
+  document.querySelectorAll('.doodle').forEach(d => d.classList.remove('visible'));
+  // Reset sequenced items
+  document.querySelectorAll('.seq').forEach(s => s.classList.remove('in'));
+  // Reset keepsake
+  document.getElementById('keepsake').classList.remove('in');
+  // Reset signature
+  const path = document.getElementById('sig-path');
+  const flourish = document.getElementById('sig-flourish');
+  if (path) {
+    const len = path.getTotalLength();
+    path.style.transition = 'none';
+    path.style.strokeDashoffset = len;
+  }
+  if (flourish) {
+    const fLen = flourish.getTotalLength();
+    flourish.style.transition = 'none';
+    flourish.style.strokeDashoffset = fLen;
+  }
+  // Reset salutation
+  const sal = document.getElementById('sal-path');
+  if (sal) {
+    const sLen = sal.getTotalLength();
+    sal.style.transition = 'none';
+    sal.style.strokeDashoffset = sLen;
+  }
+
+  // Re-fold
+  bottom.classList.remove('unfolded');
+  wrapper.classList.add('closed');
+  // Restore wax seal
+  seal.classList.remove('cracked');
+  seal.style.opacity = '';
+
+  // Replay after a short pause
+  setTimeout(() => {
+    document.getElementById('open-hint').classList.add('show');
+    if (reducedMotion) {
+      beginUnfoldSequence(mode);
+    } else {
+      armWaxSeal(mode);
+    }
+  }, 900);
+}
+
+/* ══ 11. EVENT LISTENERS ════════════════════════════════ */
+document.getElementById('unlock-btn')
+  .addEventListener('click', tryUnlock);
+
+document.getElementById('kf')
+  .addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+
+document.getElementById('read-again')
+  .addEventListener('click', readAgain);
+
+initSoundToggle();
+showMemory();
+startPetals();
+
+window.addEventListener('load', () => {
+  if (window.matchMedia('(min-width: 720px)').matches) {
+    document.getElementById('kf').focus();
+  }
+});
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
